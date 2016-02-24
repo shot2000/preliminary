@@ -1,0 +1,160 @@
+#
+#
+##### Cross Validation #####
+#
+
+###################################################################################
+#
+### Cross-validation of Ordinary Least Squares Regression ###
+
+# Import some example data; here naming it 'sample1.df' from the web.
+
+sample1.df <- read.table("http://www.unt.edu/rss/class/Jon/R_SC/Module9/CrossValidation/cv_sample1.df.txt",
+   header=TRUE, sep=",", na.strings="NA", dec=".", strip.white=TRUE)
+head(sample1.df)
+summary(sample1.df)
+
+library(Design)
+
+# Specify a model using the 'ols' function from the 'Design' package; make sure to
+# save the x and y values (x = TRUE, y = TRUE).
+
+model.1 <- ols(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7, sample1.df, x = TRUE, y = TRUE)
+model.1
+
+# The 'validate' function in the 'Design' package "does resampling validation of
+# a regression model, with or without backward step-down variable deletion" (Harrell, 2009, p. 187).
+
+# Here, our examples focus on OLS regression, but the 'validate' function can hand a
+# logistic model as well; as long as the model is fit with the 'lrm' function (Logistic
+# Regression Model) in the 'Design' package.
+
+# The key part of the output for this function is the 'index.corrected' measures of fit --
+# which corrects for over-fitting.
+
+# Default values/arguments for 'validate' uses the 'boot' method (bootstrapped validation).
+
+val.boot <- validate(model.1, method = "boot", B = 40, bw = FALSE, rule = "aic",
+                     type = "residual", sls = 0.05, aic = 0, pr = FALSE)
+val.boot
+
+# Exploring the 'crossvalidation' method.
+
+val.cross <- validate(model.1, method = "crossvalidation", B = 40, bw = FALSE, rule = "aic",
+                      type = "residual", sls = 0.05, aic = 0, pr = FALSE)
+val.cross
+
+# Exploring the '.632' method (See Efron, 1983; Efron & Tibshirani, 1997).
+
+val.632 <- validate(model.1, method = ".632", B = 40, bw = FALSE, rule = "aic",
+                    type = "residual", sls = 0.05, aic = 0, pr = FALSE)
+val.632
+
+# The 'calibrate' function in the 'Design' package "uses bootstrapping or cross-validation
+# to get bias-corrected (overfitting - corrected) estimates of predicted vs. observed
+# values based on subsetting predictions into intervals (for survival models) or on
+# nonparametric smoothers (for other models)" (Harrell, 2009, p. 20).
+
+cal.boot <- calibrate(model.1, method = "boot", B = 40, bw = FALSE, rule = "aic",
+                      type = "residual", sls = 0.05, pr = FALSE)
+cal.boot
+
+cal.cross <- calibrate(model.1, method = "crossvalidation", B = 40, bw = FALSE, rule = "aic",
+                      type = "residual", sls = 0.05, pr = FALSE)
+cal.cross
+
+cal.632 <- calibrate(model.1, method = ".632", B = 40, bw = FALSE, rule = "aic",
+                      type = "residual", sls = 0.05, pr = FALSE)
+cal.632
+
+# http://cran.r-project.org/web/packages/Design/index.html
+
+## Cross validation of OLS linear models with the 'DAAG' package. The function 'CVlm'
+## is used for multiple linear regression, the function 'cv.lm' is used for simple
+## linear regression, and the function 'CVbinary' is used for logistic regression models.
+
+library(DAAG)
+
+# Ten fold cross validation. This function returns a table for each fold (m = folds) and
+# a plot showing each fold in a different color.
+
+val.daag <- CVlm(df = sample1.df, m = 10, form.lm = formula(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7))
+
+# http://cran.r-project.org/web/packages/DAAG/index.html
+# http://www.stat.ucl.ac.be/ISdidactique/Rhelp/library/DAAG/html/cv.lm.html
+
+###################################################################################
+#
+### Cross validation for Generalized Linear Models (e.g. logistic, quadratic, etc.).
+
+library(boot)
+
+model.2 <- glm(y ~ x1 + x2 + x4 + x5 + x6 + x7, sample1.df, family = gaussian)
+summary(model.2)
+
+# The 'cv.glm' function returns a 'delta' which shows (first) the raw cross-validation estimate
+# of prediction error and (second) the adjusted cross-validation estimate. The adjustment is
+# designed to compensate for the bias introduced by not using leave-one-out cross-validation.
+
+# Ten fold cross validation.
+
+val.10.fold <- cv.glm(data = sample1.df, glmfit = model.2, K = 10)
+val.10.fold
+
+# Leave one out cross validation (default).
+
+val.loocv <- cv.glm(data = sample1.df, glmfit = model.2, K = nrow(sample1.df))
+val.loocv
+
+# http://cran.r-project.org/web/packages/boot/index.html
+# http://stat.ethz.ch/R-manual/R-patched/library/boot/html/cv.glm.html
+
+###########################################################################################
+#
+########## General References & Resources ##########
+#
+# Chernick, M. R. (2008). Bootstrap methods: A guide for practitioners and
+#      Researchers (2nd ed.). Hoboken, NJ: John Wiley & Sons, Inc.
+#
+# Efron, B. (1983). Estimating the error rate of a prediction rule: Some improvements on
+#      cross-validation. Journal of the American Statistical Association, 78, 316 - 331.
+#
+# Efron, B, & Tibshirani, R. (1993). An introduction to the bootstrap. New York:
+#      Chapman & Hall.
+#
+# Efron, B., & Tibshirani, R. (1997). Improvements on cross-validation: The .632+ bootstrap
+#     method. Journal of the American Statistical Association, 92(438), 548 - 560.
+#
+# Harrell, F., Lee, K., & Mark, D. (1996). Tutorial in Biostatistics: Multivariable prognostic
+#     models: Issues in developing models, evaluating assumptions and adequacy, and measuring
+#     and reducing errors. Statistics in Medicine, 15, 361 - 387.
+#     Available at: http://www.yaroslavvb.com/papers/steyerberg-application.pdf
+#
+# Harrell, F. (1998). Comparisons of strategies for validating binary logistic regression
+#     models. Available at: http://biostat.mc.vanderbilt.edu/twiki/pub/Main/RmS/logistic.val.pdf
+#
+# Harrell, F. E. (2001). Regression modeling strategies: With applications to
+#      linear models, logistic regression, and survival analysis. New York:
+#      Springer-Verlag, Inc.
+#
+# Harrell, F. E. (2009). Package 'Design'. Available at CRAN:
+#      http://cran.r-project.org/web/packages/Design/index.html
+#
+# Maindonald, J., & Braun, W. J. (2011). Package 'DAAG'. Available at CRAN:
+#      http://cran.r-project.org/web/packages/DAAG/index.html
+#
+# Moore, A. (2008). Cross-Validation: tutorial slides. Available at:
+#      http://www.autonlab.org/tutorials/overfit.html
+#
+# Ripley, B. (2010). Package 'boot'. Available at CRAN:
+#      http://cran.r-project.org/web/packages/boot/index.html
+#
+# Schneider, J. (1997). Cross validation. Availabe at:
+#      http://www.cs.cmu.edu/~schneide/tut5/node42.html
+#
+# Wikipedia. (2011). Cross-validation (statistics). Available at:
+#      http://en.wikipedia.org/wiki/Cross-validation_%28statistics%29
+#
+
+
+# End; last updated: May 10, 2011.

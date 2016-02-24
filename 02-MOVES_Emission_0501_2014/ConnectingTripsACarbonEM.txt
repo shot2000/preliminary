@@ -1,0 +1,160 @@
+# clear memory 
+rm(list=ls(all=TRUE)) 
+# Read trip and emission data
+HHTrips<- read.table("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/HH_Travel.csv",header=T,sep=",",quote="")
+Emissions <- read.table("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/Emissions.csv",header=T,sep=",",quote="")
+# join two tables
+total <- merge(Emissions,HHTrips,by="HHID")
+# read the household master data
+HH <- read.dbf('H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/HH.dbf')
+total1 <- merge(total,HH,by="HHID")
+# subset data 
+newdata <- total1[c(1:5,11, 15:16, 18:19,22, 32, 43:45)]
+nrow (newdata)
+[1] 2580
+# write data
+library(xlsx)
+write.xlsx(x = newdata, file = "H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/Master.xlsx",
+        sheetName = "all", row.names = FALSE)
+		
+###regression
+# Read Data
+Regression <- read.table("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/Regression.csv",header=T,sep=",",quote="")
+fit <- lm(CarbonEM ~ AREATYPE + HHSIZE + WORKERS+DRIVERS+TOTVEH+INCOME+GPSTRIPS, data=Regression)
+summary(fit) # show results
+Call:
+lm(formula = CarbonEM ~ AREATYPE + HHSIZE + WORKERS + DRIVERS + 
+    TOTVEH + INCOME + GPSTRIPS, data = Regression)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0018963 -0.0011146 -0.0008732 -0.0005669  0.0191131 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -3.723e-04  2.811e-04  -1.325   0.1855    
+AREATYPE     3.743e-04  9.336e-05   4.009 6.27e-05 ***
+HHSIZE      -1.235e-04  5.974e-05  -2.068   0.0388 *  
+WORKERS      1.596e-04  8.019e-05   1.990   0.0467 *  
+DRIVERS      5.426e-05  1.193e-04   0.455   0.6494    
+TOTVEH      -7.453e-06  7.463e-05  -0.100   0.9205    
+INCOME       1.119e-04  4.778e-05   2.342   0.0192 *  
+GPSTRIPS    -3.439e-06  1.542e-06  -2.230   0.0258 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.002898 on 2572 degrees of freedom
+Multiple R-squared: 0.01626,	Adjusted R-squared: 0.01359 
+F-statistic: 6.074 on 7 and 2572 DF,  p-value: 4.729e-07 
+
+# diagnostic plots 
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(fit)
+
+fit1 <- lm(CarbonEM ~ AREATYPE + HHSIZE + WORKERS+DRIVERS+TOTVEH+INCOME+GPSTRIPS+AvgTRIPDUR+AvgTRIPSPD+AvgTRIPDIST, data=Regression)
+summary(fit1) # show results
+Call:
+lm(formula = CarbonEM ~ AREATYPE + HHSIZE + WORKERS + DRIVERS + 
+    TOTVEH + INCOME + GPSTRIPS + AvgTRIPDUR + AvgTRIPSPD + AvgTRIPDIST, 
+    data = Regression)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-0.0256799 -0.0009612 -0.0001713  0.0004728  0.0072398 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.942e-04  2.605e-04   0.745   0.4561    
+AREATYPE    -1.070e-04  6.612e-05  -1.619   0.1057    
+HHSIZE       9.263e-07  4.059e-05   0.023   0.9818    
+WORKERS     -6.113e-05  5.493e-05  -1.113   0.2658    
+DRIVERS      6.141e-05  8.096e-05   0.759   0.4482    
+TOTVEH      -1.249e-04  5.081e-05  -2.457   0.0141 *  
+INCOME       3.832e-05  3.252e-05   1.178   0.2388    
+GPSTRIPS    -1.906e-06  1.046e-06  -1.822   0.0685 .  
+AvgTRIPDUR   9.369e-08  1.912e-07   0.490   0.6242    
+AvgTRIPSPD  -8.371e-05  1.013e-05  -8.265   <2e-16 ***
+AvgTRIPDIST  4.600e-04  1.724e-05  26.676   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.001965 on 2569 degrees of freedom
+Multiple R-squared: 0.5483,	Adjusted R-squared: 0.5465 
+F-statistic: 311.8 on 10 and 2569 DF,  p-value: < 2.2e-16 
+
+#GLM
+fitglm <- glm(CarbonEM ~ AREATYPE + HHSIZE + WORKERS+DRIVERS+TOTVEH+INCOME+GPSTRIPS, data=Regression)
+summary(fitglm) # show results
+Call:
+glm(formula = CarbonEM ~ AREATYPE + HHSIZE + WORKERS + DRIVERS + 
+    TOTVEH + INCOME + GPSTRIPS, data = Regression)
+
+Deviance Residuals: 
+       Min          1Q      Median          3Q         Max  
+-0.0018963  -0.0011146  -0.0008732  -0.0005669   0.0191131  
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -3.723e-04  2.811e-04  -1.325   0.1855    
+AREATYPE     3.743e-04  9.336e-05   4.009 6.27e-05 ***
+HHSIZE      -1.235e-04  5.974e-05  -2.068   0.0388 *  
+WORKERS      1.596e-04  8.019e-05   1.990   0.0467 *  
+DRIVERS      5.426e-05  1.193e-04   0.455   0.6494    
+TOTVEH      -7.453e-06  7.463e-05  -0.100   0.9205    
+INCOME       1.119e-04  4.778e-05   2.342   0.0192 *  
+GPSTRIPS    -3.439e-06  1.542e-06  -2.230   0.0258 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+(Dispersion parameter for gaussian family taken to be 8.399053e-06)
+
+    Null deviance: 0.021959  on 2579  degrees of freedom
+Residual deviance: 0.021602  on 2572  degrees of freedom
+AIC: -22822
+
+Number of Fisher Scoring iterations: 2
+
+
+# diagnostic plots 
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(fitglm)
+
+#GLM
+fitglm1 <- glm(CarbonEM ~ AREATYPE + HHSIZE + WORKERS+DRIVERS+TOTVEH+INCOME+GPSTRIPS+AvgTRIPDUR+AvgTRIPSPD+AvgTRIPDIST, data=Regression)
+summary(fitglm1) # show results
+Call:
+glm(formula = CarbonEM ~ AREATYPE + HHSIZE + WORKERS + DRIVERS + 
+    TOTVEH + INCOME + GPSTRIPS + AvgTRIPDUR + AvgTRIPSPD + AvgTRIPDIST, 
+    data = Regression)
+
+Deviance Residuals: 
+       Min          1Q      Median          3Q         Max  
+-0.0256799  -0.0009612  -0.0001713   0.0004728   0.0072398  
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.942e-04  2.605e-04   0.745   0.4561    
+AREATYPE    -1.070e-04  6.612e-05  -1.619   0.1057    
+HHSIZE       9.263e-07  4.059e-05   0.023   0.9818    
+WORKERS     -6.113e-05  5.493e-05  -1.113   0.2658    
+DRIVERS      6.141e-05  8.096e-05   0.759   0.4482    
+TOTVEH      -1.249e-04  5.081e-05  -2.457   0.0141 *  
+INCOME       3.832e-05  3.252e-05   1.178   0.2388    
+GPSTRIPS    -1.906e-06  1.046e-06  -1.822   0.0685 .  
+AvgTRIPDUR   9.369e-08  1.912e-07   0.490   0.6242    
+AvgTRIPSPD  -8.371e-05  1.013e-05  -8.265   <2e-16 ***
+AvgTRIPDIST  4.600e-04  1.724e-05  26.676   <2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+(Dispersion parameter for gaussian family taken to be 3.861458e-06)
+
+    Null deviance: 0.0219595  on 2579  degrees of freedom
+Residual deviance: 0.0099201  on 2569  degrees of freedom
+AIC: -24824
+
+Number of Fisher Scoring iterations: 2
+
+# diagnostic plots 
+layout(matrix(c(1,2,3,4),2,2)) # optional 4 graphs/page 
+plot(fitglm1)

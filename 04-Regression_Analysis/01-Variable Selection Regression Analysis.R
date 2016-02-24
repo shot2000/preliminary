@@ -1,0 +1,344 @@
+
+rm(list = ls(all = TRUE)) # remove all data
+# read data
+Reg <- read.dbf('E:/01-Dissertation/02_Preliminary_Research/04-Regression_Analysis/Reg.dbf')
+
+# CHange Column names
+names(Reg )[6]<-paste("AT")
+names(Reg )[8]<-paste("TOTAL_HH")
+names(Reg )[9]<-paste("AVGWK") 
+names(Reg )[10]<-paste("AVGPER")
+names(Reg )[11]<-paste("AVGAUTO")
+names(Reg )[19]<-paste("EMP_L") 
+names(Reg )[20]<-paste("EMP_M") 
+names(Reg )[21]<-paste("EMP_H") 
+names(Reg )[23]<-paste("POP") 
+
+# Linear model
+lm1 = lm(CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH+TOTAL_EMPL+POP_DENSIT+EMP_DENSIT+TOTAL_AUTO+EMP_L+EMP_M+EMP_H +AVGWK+AVGPER+ AVGAUTO+Avg_CarbEM+Avg_TRIPDI+Avg_TRIPSP+Avg_TRIPDU, data=Reg)
+
+summary (lm1)
+
+Call:
+lm(formula = CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + 
+    POP_DENSIT + EMP_DENSIT + TOTAL_AUTO + EMP_L + EMP_M + EMP_H + 
+    AVGWK + AVGPER + AVGAUTO + Avg_CarbEM + Avg_TRIPDI + Avg_TRIPSP + 
+    Avg_TRIPDU, data = Reg)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.04382 -0.25622 -0.03848  0.21543  2.67275 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.458e-01  2.392e-01  -0.609   0.5426    
+ACRES        8.637e-05  4.723e-05   1.829   0.0679 .  
+AT           1.902e-01  4.779e-02   3.979 7.66e-05 ***
+POP          4.898e-04  1.076e-04   4.551 6.34e-06 ***
+TOTAL_HH     3.751e-04  2.253e-04   1.665   0.0963 .  
+TOTAL_EMPL  -3.716e-05  2.521e-05  -1.474   0.1409    
+POP_DENSIT  -2.093e-02  4.931e-03  -4.244 2.50e-05 ***
+EMP_DENSIT   3.927e-04  2.867e-04   1.370   0.1712    
+TOTAL_AUTO   4.782e-04  1.067e-04   4.483 8.65e-06 ***
+EMP_L       -1.394e-02  2.371e-01  -0.059   0.9531    
+EMP_M        2.460e-01  2.305e-01   1.067   0.2862    
+EMP_H        2.668e-02  2.378e-01   0.112   0.9107    
+AVGWK        2.038e-01  1.027e-01   1.983   0.0477 *  
+AVGPER      -3.420e-02  4.291e-02  -0.797   0.4257    
+AVGAUTO     -2.011e-01  7.606e-02  -2.643   0.0084 ** 
+Avg_CarbEM  -6.731e+01  6.595e+01  -1.021   0.3078    
+Avg_TRIPDI  -1.769e-03  2.245e-02  -0.079   0.9372    
+Avg_TRIPSP   2.041e-02  3.937e-03   5.184 2.87e-07 ***
+Avg_TRIPDU  -2.636e-05  1.587e-04  -0.166   0.8681    
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.5016 on 674 degrees of freedom
+Multiple R-squared: 0.8005,	Adjusted R-squared: 0.7951 
+F-statistic: 150.2 on 18 and 674 DF,  p-value: < 2.2e-16 
+
+##VIF > 10 is highly colinear
+vif (mod.lm)
+
+# Stepwise Regression / variable selection
+lm2<- step(lm1, direction="backward")
+Start:  AIC=-937.43
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_L + EMP_M + EMP_H + AVGWK + 
+    AVGPER + AVGAUTO + Avg_CarbEM + Avg_TRIPDI + Avg_TRIPSP + 
+    Avg_TRIPDU
+
+             Df Sum of Sq    RSS     AIC
+- EMP_L       1    0.0009 169.61 -939.43
+- Avg_TRIPDI  1    0.0016 169.61 -939.43
+- EMP_H       1    0.0032 169.61 -939.42
+- Avg_TRIPDU  1    0.0069 169.61 -939.40
+- AVGPER      1    0.1599 169.77 -938.78
+- Avg_CarbEM  1    0.2622 169.87 -938.36
+- EMP_M       1    0.2866 169.89 -938.26
+- EMP_DENSIT  1    0.4722 170.08 -937.51
+<none>                    169.61 -937.43
+- TOTAL_EMPL  1    0.5468 170.15 -937.20
+- TOTAL_HH    1    0.6978 170.30 -936.59
+- ACRES       1    0.8414 170.45 -936.00
+- AVGWK       1    0.9897 170.60 -935.40
+- AVGAUTO     1    1.7585 171.37 -932.28
+- AT          1    3.9845 173.59 -923.34
+- POP_DENSIT  1    4.5327 174.14 -921.16
+- TOTAL_AUTO  1    5.0569 174.66 -919.07
+- POP         1    5.2115 174.82 -918.46
+- Avg_TRIPSP  1    6.7628 176.37 -912.34
+
+Step:  AIC=-939.43
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_M + EMP_H + AVGWK + AVGPER + 
+    AVGAUTO + Avg_CarbEM + Avg_TRIPDI + Avg_TRIPSP + Avg_TRIPDU
+
+             Df Sum of Sq    RSS     AIC
+- Avg_TRIPDI  1    0.0015 169.61 -941.42
+- Avg_TRIPDU  1    0.0070 169.61 -941.40
+- EMP_H       1    0.0369 169.64 -941.28
+- AVGPER      1    0.1611 169.77 -940.77
+- Avg_CarbEM  1    0.2626 169.87 -940.36
+- EMP_DENSIT  1    0.4736 170.08 -939.50
+<none>                    169.61 -939.43
+- TOTAL_EMPL  1    0.5608 170.17 -939.14
+- TOTAL_HH    1    0.6974 170.31 -938.59
+- ACRES       1    0.8450 170.45 -937.98
+- AVGWK       1    0.9894 170.60 -937.40
+- AVGAUTO     1    1.7576 171.37 -934.28
+- EMP_M       1    2.5048 172.11 -931.27
+- AT          1    3.9891 173.60 -925.32
+- POP_DENSIT  1    4.5319 174.14 -923.16
+- TOTAL_AUTO  1    5.0594 174.67 -921.06
+- POP         1    5.2108 174.82 -920.46
+- Avg_TRIPSP  1    6.7724 176.38 -914.30
+
+Step:  AIC=-941.42
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_M + EMP_H + AVGWK + AVGPER + 
+    AVGAUTO + Avg_CarbEM + Avg_TRIPSP + Avg_TRIPDU
+
+             Df Sum of Sq    RSS     AIC
+- Avg_TRIPDU  1    0.0057 169.61 -943.40
+- EMP_H       1    0.0365 169.65 -943.27
+- AVGPER      1    0.1607 169.77 -942.77
+- EMP_DENSIT  1    0.4727 170.08 -941.49
+<none>                    169.61 -941.42
+- TOTAL_EMPL  1    0.5594 170.17 -941.14
+- TOTAL_HH    1    0.7120 170.32 -940.52
+- ACRES       1    0.8441 170.45 -939.98
+- Avg_CarbEM  1    0.9846 170.59 -939.41
+- AVGWK       1    0.9879 170.60 -939.40
+- AVGAUTO     1    1.7687 171.38 -936.23
+- EMP_M       1    2.5086 172.12 -933.25
+- AT          1    3.9959 173.60 -927.29
+- POP_DENSIT  1    4.5350 174.14 -925.14
+- TOTAL_AUTO  1    5.0695 174.68 -923.01
+- POP         1    5.2097 174.82 -922.46
+- Avg_TRIPSP  1    7.2295 176.84 -914.50
+
+Step:  AIC=-943.4
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_M + EMP_H + AVGWK + AVGPER + 
+    AVGAUTO + Avg_CarbEM + Avg_TRIPSP
+
+             Df Sum of Sq    RSS     AIC
+- EMP_H       1    0.0363 169.65 -945.25
+- AVGPER      1    0.1641 169.78 -944.73
+- EMP_DENSIT  1    0.4757 170.09 -943.46
+<none>                    169.61 -943.40
+- TOTAL_EMPL  1    0.5573 170.17 -943.13
+- TOTAL_HH    1    0.7073 170.32 -942.52
+- ACRES       1    0.8507 170.47 -941.93
+- AVGWK       1    1.0045 170.62 -941.31
+- AVGAUTO     1    1.7837 171.40 -938.15
+- EMP_M       1    2.5042 172.12 -935.24
+- Avg_CarbEM  1    3.2546 172.87 -932.23
+- AT          1    4.0208 173.63 -929.16
+- POP_DENSIT  1    4.5406 174.16 -927.09
+- TOTAL_AUTO  1    5.0980 174.71 -924.88
+- POP         1    5.2044 174.82 -924.46
+- Avg_TRIPSP  1    7.9646 177.58 -913.60
+
+Step:  AIC=-945.25
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_M + AVGWK + AVGPER + AVGAUTO + 
+    Avg_CarbEM + Avg_TRIPSP
+
+             Df Sum of Sq    RSS     AIC
+- AVGPER      1    0.1680 169.82 -946.57
+- EMP_DENSIT  1    0.4864 170.14 -945.27
+<none>                    169.65 -945.25
+- TOTAL_EMPL  1    0.5845 170.24 -944.87
+- TOTAL_HH    1    0.7371 170.39 -944.25
+- ACRES       1    0.8154 170.47 -943.93
+- AVGWK       1    1.0060 170.66 -943.15
+- AVGAUTO     1    1.7564 171.41 -940.11
+- EMP_M       1    2.9459 172.60 -935.32
+- Avg_CarbEM  1    3.2286 172.88 -934.19
+- AT          1    4.0687 173.72 -930.83
+- POP_DENSIT  1    4.5067 174.16 -929.08
+- TOTAL_AUTO  1    5.1160 174.77 -926.66
+- POP         1    5.1683 174.82 -926.45
+- Avg_TRIPSP  1    7.9371 177.59 -915.56
+
+Step:  AIC=-946.57
+CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + POP_DENSIT + 
+    EMP_DENSIT + TOTAL_AUTO + EMP_M + AVGWK + AVGAUTO + Avg_CarbEM + 
+    Avg_TRIPSP
+
+             Df Sum of Sq    RSS     AIC
+<none>                    169.82 -946.57
+- EMP_DENSIT  1    0.5512 170.37 -946.32
+- TOTAL_EMPL  1    0.5780 170.40 -946.21
+- ACRES       1    0.7202 170.54 -945.63
+- AVGWK       1    0.8675 170.69 -945.03
+- TOTAL_HH    1    0.9331 170.75 -944.77
+- AVGAUTO     1    1.6830 171.50 -941.73
+- EMP_M       1    2.8739 172.69 -936.94
+- Avg_CarbEM  1    3.2090 173.03 -935.59
+- AT          1    3.9328 173.75 -932.70
+- POP_DENSIT  1    4.7751 174.59 -929.35
+- POP         1    5.1441 174.96 -927.88
+- TOTAL_AUTO  1    5.6950 175.51 -925.71
+- Avg_TRIPSP  1    7.8110 177.63 -917.40
+
+#####################################################
+
+#The final model
+summary (lm2) 
+
+Call:
+lm(formula = CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + 
+    POP_DENSIT + EMP_DENSIT + TOTAL_AUTO + EMP_M + AVGWK + AVGAUTO + 
+    Avg_CarbEM + Avg_TRIPSP, data = Reg)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.05135 -0.25754 -0.03712  0.21129  2.66938 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.606e-01  1.083e-01  -1.482 0.138675    
+ACRES        7.610e-05  4.484e-05   1.697 0.090160 .  
+AT           1.868e-01  4.710e-02   3.965 8.10e-05 ***
+POP          4.565e-04  1.006e-04   4.535 6.80e-06 ***
+TOTAL_HH     4.199e-04  2.174e-04   1.932 0.053826 .  
+TOTAL_EMPL  -3.776e-05  2.484e-05  -1.520 0.128934    
+POP_DENSIT  -2.128e-02  4.870e-03  -4.369 1.44e-05 ***
+EMP_DENSIT   4.214e-04  2.838e-04   1.485 0.138110    
+TOTAL_AUTO   4.961e-04  1.040e-04   4.772 2.24e-06 ***
+EMP_M        2.396e-01  7.069e-02   3.390 0.000740 ***
+AVGWK        1.583e-01  8.502e-02   1.862 0.062971 .  
+AVGAUTO     -1.940e-01  7.480e-02  -2.594 0.009688 ** 
+Avg_CarbEM  -7.543e+01  2.106e+01  -3.582 0.000365 ***
+Avg_TRIPSP   1.989e-02  3.558e-03   5.589 3.32e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.5001 on 679 degrees of freedom
+Multiple R-squared: 0.8002,	Adjusted R-squared: 0.7964 
+F-statistic: 209.2 on 13 and 679 DF,  p-value: < 2.2e-16 
+
+ #Regression Diagnostics    
+ # visualize four graphs at once
+par(family = 'Helvetica')
+par(mfrow=c(2,2))
+plot(lm2, col="blue",pch=20)
+
+
+
+
+ #Extracting Elements of the Model Object
+ 
+ Coe<- lm2[[1]]                          # extract list item 1: coefficients
+ 
+ Res<- lm2[[2]]                         # extract list item 2: residuals
+ #the final model
+ lmf<- lm(formula = CarEMTAZ ~ ACRES  + AT  + POP+
+  TOTAL_HH+TOTAL_EMPL+POP_DENSIT+EMP_DENSIT+TOTAL_AUTO+EMP_M+AVGWK+AVGAUTO+Avg_CarbEM+Avg_TRIPSP, data = Reg)
+  
+summary (lmf)
+
+ Call:
+lm(formula = CarEMTAZ ~ ACRES + AT + POP + TOTAL_HH + TOTAL_EMPL + 
+    POP_DENSIT + EMP_DENSIT + TOTAL_AUTO + EMP_M + AVGWK + AVGAUTO + 
+    Avg_CarbEM + Avg_TRIPSP, data = Reg)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-2.05135 -0.25754 -0.03712  0.21129  2.66938 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -1.606e-01  1.083e-01  -1.482 0.138675    
+ACRES        7.610e-05  4.484e-05   1.697 0.090160 .  
+AT           1.868e-01  4.710e-02   3.965 8.10e-05 ***
+POP          4.565e-04  1.006e-04   4.535 6.80e-06 ***
+TOTAL_HH     4.199e-04  2.174e-04   1.932 0.053826 .  
+TOTAL_EMPL  -3.776e-05  2.484e-05  -1.520 0.128934    
+POP_DENSIT  -2.128e-02  4.870e-03  -4.369 1.44e-05 ***
+EMP_DENSIT   4.214e-04  2.838e-04   1.485 0.138110    
+TOTAL_AUTO   4.961e-04  1.040e-04   4.772 2.24e-06 ***
+EMP_M        2.396e-01  7.069e-02   3.390 0.000740 ***
+AVGWK        1.583e-01  8.502e-02   1.862 0.062971 .  
+AVGAUTO     -1.940e-01  7.480e-02  -2.594 0.009688 ** 
+Avg_CarbEM  -7.543e+01  2.106e+01  -3.582 0.000365 ***
+Avg_TRIPSP   1.989e-02  3.558e-03   5.589 3.32e-08 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.5001 on 679 degrees of freedom
+Multiple R-squared: 0.8002,	Adjusted R-squared: 0.7964 
+F-statistic: 209.2 on 13 and 679 DF,  p-value: < 2.2e-16 
+
+###################################################
+
+## Model Cross-Validation
+
+library(DAAG)
+cv.lm(df=Reg, lmf, m=9) # 9 fold cross-validation
+cv.lm(df = Reg, lmf, m=9, dots = 
+      FALSE, seed=29, plotit=TRUE, printit=TRUE)
+	  
+
+# not so good fit 
+lm3 = lm(CarEMTAZ ~ ACRES +TOTAL_EMPL+EMP_DENSIT+X_ZONE_NUMB+EMP_L+EMP_M+EMP_H +AVGWK+AVGPER+ AVGAUTO+Sum_TRIPDU+Avg_TRIPDI+Avg_TRIPDU, data=Reg)
+summary (lm3)
+
+Call:
+lm(formula = CarEMTAZ ~ ACRES + TOTAL_EMPL + EMP_DENSIT + X_ZONE_NUMB + 
+    EMP_L + EMP_M + EMP_H + AVGWK + AVGPER + AVGAUTO + Sum_TRIPDU + 
+    Avg_TRIPDI + Avg_TRIPDU, data = Reg)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.8479 -0.5752 -0.1307  0.4339  3.2626 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -5.443e-01  4.103e-01  -1.327  0.18507    
+ACRES        2.067e-04  7.644e-05   2.704  0.00702 ** 
+TOTAL_EMPL  -1.042e-04  4.301e-05  -2.422  0.01570 *  
+EMP_DENSIT  -6.263e-04  4.610e-04  -1.358  0.17476    
+X_ZONE_NUMB  2.438e-04  1.599e-04   1.524  0.12790    
+EMP_L        1.036e-01  4.110e-01   0.252  0.80114    
+EMP_M        7.524e-01  3.992e-01   1.885  0.05986 .  
+EMP_H        2.222e-01  4.115e-01   0.540  0.58934    
+AVGWK        3.228e-01  1.761e-01   1.833  0.06726 .  
+AVGPER       1.808e-01  6.850e-02   2.640  0.00848 ** 
+AVGAUTO      4.455e-02  9.798e-02   0.455  0.64949    
+Sum_TRIPDU   1.731e-04  2.201e-05   7.862 1.49e-14 ***
+Avg_TRIPDI  -4.202e-02  2.016e-02  -2.084  0.03752 *  
+Avg_TRIPDU   7.746e-04  1.850e-04   4.187 3.19e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+
+Residual standard error: 0.8693 on 679 degrees of freedom
+Multiple R-squared: 0.3964,	Adjusted R-squared: 0.3848 
+F-statistic:  34.3 on 13 and 679 DF,  p-value: < 2.2e-16 
+
+par(family = 'Helvetica')
+par(mfrow=c(2,2))
+plot(lm3, col="blue",pch=20)

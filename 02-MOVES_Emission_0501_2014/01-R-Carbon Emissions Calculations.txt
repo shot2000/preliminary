@@ -1,0 +1,140 @@
+# set working directory
+setwd("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014")
+# clear memory 
+rm(list=ls(all=TRUE)) 
+# read in data
+CERate <- read.table("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/Carbon Emission Generation Rates.csv",header=T,sep=",",quote="")
+HHfraction <- read.table("H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/Household Type BY AreaType.csv",header=T,sep=",",quote="")
+# NAs to zero
+CERate[is.na(CERate)] <- 0
+HHfraction[is.na(HHfraction)] <- 0
+
+# subset data
+CERate<- CERate[c(2:8)]
+HHfraction<- HHfraction[c(2:8)]
+
+#change  column name
+names(CERate)[4]<-paste("1")
+names(CERate)[5]<-paste("2")
+names(CERate)[6]<-paste("3")
+names(CERate)[7]<-paste("4")
+
+names(HHfraction)[4]<-paste("1")
+names(HHfraction)[5]<-paste("2")
+names(HHfraction)[6]<-paste("3")
+names(HHfraction)[7]<-paste("4")
+
+# Data infusion
+library(reshape)
+CERate <- melt(CERate, id=c("Area.Type","Workers", "Life.Cycle"))
+HHfraction <- melt(HHfraction, id=c("Area.Type","Workers", "Life.Cycle"))
+
+#change column name
+names(CERate)[4]<-paste("Income.Group")
+names(CERate)[5]<-paste("Emission.Rate")
+names(HHfraction)[4]<-paste("Income.Group")
+names(HHfraction)[5]<-paste("HH.Percentage")
+# sort data
+attach(HHfraction)
+HHfraction <- HHfraction[order(Area.Type, Income.Group),]
+attach(CERate)
+CERate <- CERate[order(Area.Type, Income.Group),]
+
+# add the HHID to the data
+for(i in 1:length(CERate$Workers)){
+	CERate$HHID[i] = i
+}
+for(i in 1:length(HHfraction$Workers)){
+	HHfraction$HHID[i] = i
+}
+
+#Load the TAZ and AT
+TAZ_AvgCarbEMTripData4Regression <- read.dbf('H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/TAZ_AvgCarbEMTripData4Regression.dbf')
+AT<-TAZ_AvgCarbEMTripData4Regression [c(6,7)]
+names(AT)[1]<-paste("AT")
+names(AT)[2]<-paste("ZONE")
+attach(AT)
+AT <- AT[order(ZONE),]
+#Load 2010 HH data 
+library(XLConnect)
+HH<- readWorksheet(loadWorkbook('H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/HH2010_Data_Xin.xlsx'),sheet=1)
+HH<-HH [c(1,2)]
+#Keep only Hamilton COunty TAZs
+HH <- merge(AT,HH,by="ZONE")
+
+#calculate the household numbers by type
+
+#subset Household Fractions first 
+HHFRAT01 <-HHfraction[ which(HHfraction$Area.Type==1), ]
+HHFRAT01<-HHFRAT01 [c(6,5)]
+HHFRAT2 <-HHfraction[ which(HHfraction$Area.Type==2), ]
+HHFRAT2<-HHFRAT2 [c(6,5)]
+HHFRAT3 <-HHfraction[ which(HHfraction$Area.Type==3), ]
+HHFRAT3<-HHFRAT3 [c(6,5)]
+#convert to matrix and transpose 
+HHFRAT01<-as.matrix(HHFRAT01)
+HHFRAT01T<-t(HHFRAT01)
+HHFRAT2<-as.matrix(HHFRAT2)
+HHFRAT2T<-t(HHFRAT2)
+HHFRAT3<-as.matrix(HHFRAT3)
+HHFRAT3T<-t(HHFRAT3)
+#subset Household by locations 
+HH01 <-HH[ which(HH$AT==0 | HH$AT==1), ]
+HH2 <-HH[ which(HH$AT==2), ]
+HH3 <-HH[ which(HH$AT==3), ]
+attach (HH01)
+HH01M <- data.frame (HH01$HH) # segment only the numbers
+attach (HH2)
+HH2M <- data.frame (HH2$HH) # segment only the numbers
+attach (HH3)
+HH3M <- data.frame (HH3$HH) # segment only the numbers
+## Household number by household types
+# 
+HH01M  = data.matrix(as.data.frame(HH01M))
+HH2M  = data.matrix(as.data.frame(HH2M))
+HH3M  = data.matrix(as.data.frame(HH3M))
+
+HHFRAT01T = data.matrix(as.data.frame(HHFRAT01T))
+HHFRAT01T = HHFRAT01T[-1,]
+HHFRAT2T = data.matrix(as.data.frame(HHFRAT2T))
+HHFRAT2T = HHFRAT2T[-1,]
+HHFRAT3T = data.matrix(as.data.frame(HHFRAT3T))
+HHFRAT3T = HHFRAT3T[-1,]
+HT01<- HH01M %*% HHFRAT01T
+HT2<- HH2M %*% HHFRAT2T
+HT3<- HH3M %*% HHFRAT3T
+#Check if row sum equals to total HH
+HTCheck1<-cbind(HH01,HT01)
+
+
+#subset Emission rates by AT 
+CERate01 <-CERate[ which(CERate$Area.Type==1), ]
+CERate01<-CERate01 [c(5)]
+CERate2 <-CERate[ which(CERate$Area.Type==2), ]
+CERate2<-CERate2 [c(5)]
+CERate3 <-CERate[ which(CERate$Area.Type==3), ]
+CERate3<-CERate3 [c(5)]
+
+#Now for loop to calculate each household emissions
+#make sure the HT01 is a matrix
+#make sure the CERate01 is a vector
+CERate01<- as.numeric(CERate01[1,])
+CERate2<- as.numeric(CERate2[1,])
+CERate3<- as.numeric(CERate3[1,])
+df01<- t(t(HT01) * CERate01)
+df02<- t(t(HT2) * CERate2)
+df03<- t(t(HT3) * CERate3)
+
+# Column bind HT percentage with the Zone, AT and HH data
+#HT01<-as.data.frame(HT01)
+#HT2<-as.data.frame(HT2)
+#HT3<-as.data.frame(HT3)
+df01 <- cbind(HH01,df01)
+df02 <- cbind(HH2, df02)
+df03 <- cbind(HH3, df03)
+
+# combine the final data 
+df<- rbind (df01,df02)
+df<- rbind (df,df03)
+# Save data
+write.dbf(df,'H:/00-Dissertation/02_Preliminary_Research/MasterData_0501_2014/04-CarbonEmissionBY_TAZ.dbf')

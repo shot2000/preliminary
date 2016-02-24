@@ -1,0 +1,87 @@
+<runspec>
+	<description><![CDATA[Dissertation Test run
+Use average speed]]></description>
+	<modelscale value="Inv"/>
+	<modeldomain value="PROJECT"/>
+	<geographicselections>
+		<geographicselection type="COUNTY" key="39061" description="OHIO - Hamilton County"/>
+	</geographicselections>
+	<timespan>
+		<year key="2010"/>
+		<month id="7"/>
+		<day id="5"/>
+		<beginhour id="8"/>
+		<endhour id="8"/>
+		<aggregateBy key="Hour"/>
+	</timespan>
+	<onroadvehicleselections>
+		<onroadvehicleselection fueltypeid="1" fueltypedesc="Gasoline" sourcetypeid="21" sourcetypename="Passenger Car"/>
+	</onroadvehicleselections>
+	<offroadvehicleselections>
+	</offroadvehicleselections>
+	<offroadvehiclesccs>
+	</offroadvehiclesccs>
+	<roadtypes>
+		<roadtype roadtypeid="5" roadtypename="Urban Unrestricted Access"/>
+	</roadtypes>
+	<pollutantprocessassociations>
+		<pollutantprocessassociation pollutantkey="90" pollutantname="Atmospheric CO2" processkey="1" processname="Running Exhaust"/>
+		<pollutantprocessassociation pollutantkey="98" pollutantname="CO2 Equivalent" processkey="1" processname="Running Exhaust"/>
+		<pollutantprocessassociation pollutantkey="5" pollutantname="Methane (CH4)" processkey="1" processname="Running Exhaust"/>
+		<pollutantprocessassociation pollutantkey="91" pollutantname="Total Energy Consumption" processkey="1" processname="Running Exhaust"/>
+		<pollutantprocessassociation pollutantkey="1" pollutantname="Total Gaseous Hydrocarbons" processkey="1" processname="Running Exhaust"/>
+	</pollutantprocessassociations>
+	<databaseselections>
+	</databaseselections>
+	<internalcontrolstrategies>
+<internalcontrolstrategy classname="gov.epa.otaq.moves.master.implementation.ghg.internalcontrolstrategies.rateofprogress.RateOfProgressStrategy"><![CDATA[
+useParameters	No
+
+]]></internalcontrolstrategy>
+	</internalcontrolstrategies>
+	<inputdatabase servername="" databasename="" description=""/>
+	<uncertaintyparameters uncertaintymodeenabled="false" numberofrunspersimulation="0" numberofsimulations="0"/>
+	<geographicoutputdetail description="LINK"/>
+	<outputemissionsbreakdownselection>
+		<modelyear selected="false"/>
+		<fueltype selected="false"/>
+		<emissionprocess selected="false"/>
+		<onroadoffroad selected="true"/>
+		<roadtype selected="false"/>
+		<sourceusetype selected="false"/>
+		<movesvehicletype selected="false"/>
+		<onroadscc selected="false"/>
+		<offroadscc selected="false"/>
+		<estimateuncertainty selected="false" numberOfIterations="2" keepSampledData="false" keepIterations="false"/>
+		<sector selected="false"/>
+		<engtechid selected="false"/>
+		<hpclass selected="false"/>
+	</outputemissionsbreakdownselection>
+	<outputdatabase servername="localhost" databasename="SurveyTest_Out" description=""/>
+	<outputtimestep value="Hour"/>
+	<outputvmtdata value="true"/>
+	<outputsho value="false"/>
+	<outputsh value="false"/>
+	<outputshp value="false"/>
+	<outputshidling value="false"/>
+	<outputstarts value="false"/>
+	<outputpopulation value="false"/>
+	<scaleinputdatabase servername="localhost" databasename="surveytest_in1" description=""/>
+	<pmsize value="0"/>
+	<outputfactors>
+		<timefactors selected="true" units="Hours"/>
+		<distancefactors selected="true" units="Miles"/>
+		<massfactors selected="true" units="U.S. Ton" energyunits="KiloJoules"/>
+	</outputfactors>
+	<savedata>
+
+	</savedata>
+
+	<donotexecute>
+
+	</donotexecute>
+
+	<generatordatabase shouldsave="false" servername="" databasename="" description=""/>
+		<donotperformfinalaggregation selected="false"/>
+	<lookuptableflags scenarioid="" truncateoutput="true" truncateactivity="true"/>
+</runspec>
